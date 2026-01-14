@@ -4,6 +4,7 @@ import { UpdateOpenaiDto } from './dto/update-openai.dto';
 
 @Injectable()
 export class OpenaiService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   create(createOpenaiDto: CreateOpenaiDto) {
     return 'This action adds a new openai';
   }
@@ -16,6 +17,7 @@ export class OpenaiService {
     return `This action returns a #${id} openai`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(id: number, updateOpenaiDto: UpdateOpenaiDto) {
     return `This action updates a #${id} openai`;
   }

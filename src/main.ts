@@ -6,7 +6,7 @@ import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS for frontend
   app.enableCors({
     origin: 'http://localhost:3000',
@@ -14,17 +14,26 @@ async function bootstrap() {
   });
 
   // Enable validation
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   // Serve static files
-  app.use('/static', express.static(path.join(__dirname, '..', '..', 'uploads')));
+  app.use(
+    '/static',
+    express.static(path.join(__dirname, '..', '..', 'uploads')),
+  );
 
   await app.listen(process.env.PORT ?? 5000).then(() => {
-    Logger.log('Application started successfully: http://localhost:' + (process.env.PORT ?? 5000) , 'Bootstrap');
+    Logger.log(
+      'Application started successfully: http://localhost:' +
+        (process.env.PORT ?? 5000),
+      'Bootstrap',
+    );
   });
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
-
