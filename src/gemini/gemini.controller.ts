@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { GeminiService } from './gemini.service';
 import { CreateGeminiDto } from './dto/create-gemini.dto';
 import { UpdateGeminiDto } from './dto/update-gemini.dto';

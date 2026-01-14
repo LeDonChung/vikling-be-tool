@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BullConfigModule } from './bull/bull.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmAsyncConfig } from './common/config/typeorm.config';
-import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { JobsModule } from './jobs/jobs.module';
 import { GeminiModule } from './gemini/gemini.module';
@@ -23,17 +23,17 @@ import configuration from './common/config/configuration';
     TypeOrmModule.forRootAsync(TypeOrmAsyncConfig),
     ThrottlerModule.forRoot([
       {
-        name: "short",
+        name: 'short',
         ttl: 1000, // 1 second
         limit: 10000, // 3 requests per second
       },
       {
-        name: "medium",
+        name: 'medium',
         ttl: 10000, // 10 seconds
         limit: 10000, // 20 requests per 10 seconds
       },
       {
-        name: "long",
+        name: 'long',
         ttl: 60000, // 1 minute
         limit: 10000, // 100 requests per minute
       },
@@ -46,12 +46,12 @@ import configuration from './common/config/configuration';
     TtsfreeModule,
   ],
   controllers: [AppController],
-  providers: [AppService, 
+  providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    }
+    },
   ],
 })
-export class AppModule { }
-
+export class AppModule {}
