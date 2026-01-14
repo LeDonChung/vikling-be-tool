@@ -1,42 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus } from '@nestjs/common';
+import type { Response } from 'express';
 import { GeminiService } from './gemini.service';
-import { CreateGeminiDto } from './dto/create-gemini.dto';
-import { UpdateGeminiDto } from './dto/update-gemini.dto';
+import { TextToSpeechDto } from './dto/text-to-speech.dto';
 
 @Controller('gemini')
 export class GeminiController {
   constructor(private readonly geminiService: GeminiService) {}
 
-  @Post()
-  create(@Body() createGeminiDto: CreateGeminiDto) {
-    return this.geminiService.create(createGeminiDto);
-  }
+  @Post('tts')
+  async textToSpeech(
+    @Body() dto: TextToSpeechDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      const audioBuffer = await this.geminiService.textToSpeech(dto);
 
-  @Get()
-  findAll() {
-    return this.geminiService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.geminiService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGeminiDto: UpdateGeminiDto) {
-    return this.geminiService.update(+id, updateGeminiDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.geminiService.remove(+id);
+      res.set({
+        'Content-Type': 'audio/wav',
+        'Content-Length': audioBuffer.length,
+        'Content-Disposition': 'attachment; filename="output.wav"',
+      });
+      res.status(HttpStatus.OK).send(audioBuffer);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Text-to-Speech Failed',
+      });
+    }
   }
 }

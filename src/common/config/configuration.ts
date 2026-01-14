@@ -27,4 +27,12 @@ export default () => ({
       process.env.S3_PUBLIC_URL ||
       'https://pub-9a9604e4efdb40359db63e6d1f0d33f0.r2.dev',
   },
+  gemini: {
+    apiKeys: (process.env.GEMINI_API_KEYS || '')
+      .split(', ')
+      .map((k) => k.trim())
+      .filter(Boolean),
+    defaultModel:
+      process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts',
+  },
 });
