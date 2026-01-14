@@ -46,6 +46,14 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Whisper models and binaries (will be downloaded automatically)
+whisper-models/
+whisper-bin/
+whisper-bin.zip
+
+# Uploads directory
+uploads/
+
 # Runtime data
 pids
 *.pid

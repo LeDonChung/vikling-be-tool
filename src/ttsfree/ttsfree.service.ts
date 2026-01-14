@@ -1,6 +1,5 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { CreateTtsfreeDto } from './dto/create-ttsfree.dto';
-import { UpdateTtsfreeDto } from './dto/update-ttsfree.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,16 +19,16 @@ export class TtsfreeService {
 
   async create(createTtsfreeDto: CreateTtsfreeDto) {
     let browser: puppeteer.Browser | undefined;
-    
+
     try {
       this.logger.log('Starting TTS conversion with Puppeteer...');
-      
-      const { 
-        text, 
-        language = 'vi-VN', 
-        voice = 'vi-VN-HoaiMyNeural', 
-        voiceSpeed = 0, 
-        speechPitch = 0 
+
+      const {
+        text,
+        language = 'vi-VN',
+        voice = 'vi-VN-HoaiMyNeural',
+        voiceSpeed = 0,
+        speechPitch = 0,
       } = createTtsfreeDto;
 
       // Launch browser
@@ -40,10 +39,10 @@ export class TtsfreeService {
       });
 
       const page = await browser.newPage();
-      
+
       // Set user agent
       await page.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       );
 
       // Navigate to ttsfree.com
@@ -64,26 +63,36 @@ export class TtsfreeService {
       // Select language (vi-VN for Vietnamese)
       this.logger.log('Selecting language...');
       await page.evaluate(() => {
-        const langInput = document.querySelector('#select_lang') as HTMLInputElement;
+        const langInput = document.querySelector(
+          '#select_lang',
+        ) as HTMLInputElement;
         if (langInput) langInput.value = 'vi-VN';
       });
 
       // Select voice
       this.logger.log(`Selecting voice: ${voice}...`);
       await page.evaluate((voiceId) => {
-        const voiceInput = document.querySelector('#voiceID') as HTMLInputElement;
+        const voiceInput = document.querySelector(
+          '#voiceID',
+        ) as HTMLInputElement;
         if (voiceInput) voiceInput.value = voiceId;
-        
+
         // Click the voice radio button
-        const voiceRadio = document.querySelector(`input[value="${voiceId}"]`) as HTMLInputElement;
+        const voiceRadio = document.querySelector(
+          `input[value="${voiceId}"]`,
+        ) as HTMLInputElement;
         if (voiceRadio) voiceRadio.click();
       }, voice);
 
       // Set voice speed
       this.logger.log(`Setting voice speed: ${voiceSpeed}...`);
       await page.evaluate((speed) => {
-        const rateSlider = document.querySelector('#rate-slider') as HTMLInputElement;
-        const rateHidden = document.querySelector('#rate-hidden') as HTMLInputElement;
+        const rateSlider = document.querySelector(
+          '#rate-slider',
+        ) as HTMLInputElement;
+        const rateHidden = document.querySelector(
+          '#rate-hidden',
+        ) as HTMLInputElement;
         if (rateSlider) {
           rateSlider.value = speed.toString();
           rateSlider.dispatchEvent(new Event('input', { bubbles: true }));
@@ -94,8 +103,12 @@ export class TtsfreeService {
       // Set speech pitch
       this.logger.log(`Setting speech pitch: ${speechPitch}...`);
       await page.evaluate((pitch) => {
-        const pitchSlider = document.querySelector('#pitch-slider') as HTMLInputElement;
-        const pitchHidden = document.querySelector('#pitch-hidden') as HTMLInputElement;
+        const pitchSlider = document.querySelector(
+          '#pitch-slider',
+        ) as HTMLInputElement;
+        const pitchHidden = document.querySelector(
+          '#pitch-hidden',
+        ) as HTMLInputElement;
         if (pitchSlider) {
           pitchSlider.value = pitch.toString();
           pitchSlider.dispatchEvent(new Event('input', { bubbles: true }));
@@ -104,22 +117,25 @@ export class TtsfreeService {
       }, speechPitch);
 
       // Wait a bit for everything to settle
-      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
+      await page.evaluate(
+        () => new Promise((resolve) => setTimeout(resolve, 1000)),
+      );
 
       // Click convert button and wait for audio
       this.logger.log('Clicking convert button...');
-      
+
       // Listen for download
       const downloadPromise = new Promise<string>((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Audio download timeout after 2 minutes'));
         }, 120000); // 2 minutes timeout
 
-        page.on('response', async (response) => {
+         page.on('response', async (response) => {
           const url = response.url();
-          
-          // Check if this is an MP3 file
-          if (url.includes('.mp3') || response.headers()['content-type']?.includes('audio')) {
+          if (
+            url.includes('.mp3') ||
+            response.headers()['content-type']?.includes('audio')
+          ) {
             this.logger.log(`Found audio URL: ${url}`);
             clearTimeout(timeout);
             resolve(url);
@@ -128,30 +144,26 @@ export class TtsfreeService {
       });
 
       await page.click('#convert_now');
-      
+
       // Wait for audio URL
       const audioUrl = await downloadPromise;
-      
-      this.logger.log(`Downloading audio from: ${audioUrl}`);
-      
-      // Download the audio file
-      const audioResponse = await fetch(audioUrl);
-      if (!audioResponse.ok) {
-        throw new HttpException(
-          'Failed to download audio file',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
 
-      const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
-      
+      this.logger.log(`Downloading audio from: ${audioUrl}`);
+
+      // Download the audio file using puppeteer's page context
+      const audioBuffer = await page.evaluate(async (url) => {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        return Array.from(new Uint8Array(arrayBuffer));
+      }, audioUrl);
+
       // Generate unique filename
       const filename = `tts_${uuidv4()}.mp3`;
       const filepath = path.join(this.uploadDir, filename);
-      
+
       // Save audio file
-      fs.writeFileSync(filepath, audioBuffer);
-      
+      fs.writeFileSync(filepath, Buffer.from(audioBuffer));
+
       this.logger.log(`Audio saved to: ${filepath}`);
 
       return {
@@ -166,7 +178,7 @@ export class TtsfreeService {
           language,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('TTS conversion failed:', error);
       throw new HttpException(
         error.message || 'Failed to convert text to speech',
@@ -183,12 +195,12 @@ export class TtsfreeService {
     // List all generated audio files
     try {
       const files = fs.readdirSync(this.uploadDir);
-      const audioFiles = files.filter(file => file.endsWith('.mp3'));
-      
+      const audioFiles = files.filter((file) => file.endsWith('.mp3'));
+
       return {
         success: true,
         count: audioFiles.length,
-        files: audioFiles.map(file => {
+        files: audioFiles.map((file) => {
           const filepath = path.join(this.uploadDir, file);
           const stats = fs.statSync(filepath);
           return {
@@ -199,22 +211,11 @@ export class TtsfreeService {
         }),
       };
     } catch (error) {
+      this.logger.error('Failed to list audio files:', error);
       throw new HttpException(
         'Failed to list audio files',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} ttsfree`;
-  }
-
-  update(id: number, updateTtsfreeDto: UpdateTtsfreeDto) {
-    return `This action updates a #${id} ttsfree`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} ttsfree`;
   }
 }

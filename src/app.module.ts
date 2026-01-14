@@ -12,6 +12,8 @@ import { GeminiModule } from './gemini/gemini.module';
 import { OpenaiModule } from './openai/openai.module';
 import { GrokModule } from './grok/grok.module';
 import { TtsfreeModule } from './ttsfree/ttsfree.module';
+import { SttModule } from './stt/stt.module';
+import { TranslationModule } from './translation/translation.module';
 import configuration from './common/config/configuration';
 
 @Module({
@@ -44,6 +46,8 @@ import configuration from './common/config/configuration';
     OpenaiModule,
     GrokModule,
     TtsfreeModule,
+    SttModule,
+    TranslationModule,
   ],
   controllers: [AppController],
   providers: [
