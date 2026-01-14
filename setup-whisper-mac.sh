@@ -33,96 +33,55 @@ else
     fi
 fi
 
-# Download pre-compiled binary for macOS
+# Build from source for macOS
 echo ""
-echo "Downloading whisper.cpp macOS binary..."
+echo "Building whisper.cpp from source..."
 
 WHISPER_DIR="whisper-bin"
-BINARY_URL="https://github.com/ggerganov/whisper.cpp/releases/download/v1.5.5/whisper-bin-macos.zip"
-ZIP_FILE="whisper-bin.zip"
 
-if curl -L -o "$ZIP_FILE" "$BINARY_URL"; then
-    echo "Download complete!"
-else
-    echo "Failed to download from v1.5.5, trying alternative..."
-    BINARY_URL="https://github.com/ggerganov/whisper.cpp/releases/download/v1.5.4/whisper-bin-macos.zip"
-    if curl -L -o "$ZIP_FILE" "$BINARY_URL"; then
-        echo "Download complete!"
-    else
-        echo "Failed to download pre-built binary."
-        echo "Trying to build from source..."
-        
-        # Clone and build whisper.cpp
-        if command -v git &> /dev/null && command -v make &> /dev/null; then
-            if [ ! -d "whisper.cpp" ]; then
-                git clone https://github.com/ggerganov/whisper.cpp.git
-            fi
-            cd whisper.cpp
-            make
-            cd ..
-            
-            # Create whisper-bin directory and copy binary
-            mkdir -p "$WHISPER_DIR"
-            cp whisper.cpp/main "$WHISPER_DIR/"
-            
-            echo "Built whisper.cpp from source successfully!"
-            echo ""
-            echo "=== Setup Complete ==="
-            echo "Binary location: $WHISPER_DIR/main"
-            echo "Models directory: $MODELS_DIR"
-            echo ""
-            echo "You can now start the server with: pnpm start:dev"
-            exit 0
-        else
-            echo "Please install Xcode Command Line Tools:"
-            echo "xcode-select --install"
-            exit 1
-        fi
-    fi
-fi
-
-# Extract binary
-echo ""
-echo "Extracting binary..."
-if [ -d "$WHISPER_DIR" ]; then
-    rm -rf "$WHISPER_DIR"
-fi
-
-if unzip -q "$ZIP_FILE" -d "$WHISPER_DIR"; then
-    echo "Extraction complete!"
-else
-    echo "Failed to extract binary"
+# Check for required tools
+if ! command -v git &> /dev/null; then
+    echo "Error: git is not installed"
+    echo "Please install Xcode Command Line Tools:"
+    echo "xcode-select --install"
     exit 1
 fi
 
-# Cleanup zip
-rm -f "$ZIP_FILE"
+if ! command -v cmake &> /dev/null; then
+    echo "Error: cmake is not installed"
+    echo "Please install cmake:"
+    echo "brew install cmake"
+    exit 1
+fi
 
-# Make binaries executable
-chmod +x "$WHISPER_DIR"/*
+# Clone whisper.cpp if not exists
+if [ ! -d "whisper.cpp" ]; then
+    echo "Cloning whisper.cpp repository..."
+    git clone https://github.com/ggerganov/whisper.cpp.git
+fi
 
-# Find main binary
-if [ -f "$WHISPER_DIR/main" ]; then
+# Build whisper.cpp
+cd whisper.cpp
+echo "Building with cmake..."
+cmake -B build
+cmake --build build -j
+cd ..
+
+# Create whisper-bin directory and copy binary
+mkdir -p "$WHISPER_DIR"
+
+# Copy the whisper-cli binary (the main executable for macOS)
+if [ -f "whisper.cpp/build/bin/whisper-cli" ]; then
+    cp whisper.cpp/build/bin/whisper-cli "$WHISPER_DIR/"
+    echo "Built whisper.cpp from source successfully!"
     echo ""
     echo "=== Setup Complete ==="
-    echo "Found binary: $WHISPER_DIR/main"
+    echo "Binary location: $WHISPER_DIR/whisper-cli"
     echo "Models directory: $MODELS_DIR"
     echo ""
     echo "You can now start the server with: pnpm start:dev"
 else
-    BINARIES=$(find "$WHISPER_DIR" -type f -perm +111 2>/dev/null)
-    if [ -n "$BINARIES" ]; then
-        echo ""
-        echo "=== Setup Complete ==="
-        echo "Found executables:"
-        echo "$BINARIES"
-        echo ""
-        echo "Models directory: $MODELS_DIR"
-        echo ""
-        echo "You can now start the server with: pnpm start:dev"
-    else
-        echo ""
-        echo "Warning: No executable files found in extracted archive"
-        echo "Please check the contents of: $WHISPER_DIR"
-    fi
+    echo "Error: Failed to build whisper-cli binary"
+    echo "Build output should be at: whisper.cpp/build/bin/whisper-cli"
+    exit 1
 fi

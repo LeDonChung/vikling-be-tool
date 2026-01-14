@@ -144,7 +144,7 @@ export class SttService {
     // Detect OS and check for whisper binary
     const isWindows = process.platform === 'win32';
     const isMac = process.platform === 'darwin';
-    
+
     const possiblePaths = [
       // Primary locations (setup script puts binary here)
       path.join(process.cwd(), 'whisper-bin', isWindows ? 'main.exe' : 'main'),
@@ -171,12 +171,12 @@ export class SttService {
     }
 
     if (!whisperExe) {
-      const setupCommand = isWindows 
+      const setupCommand = isWindows
         ? 'powershell -ExecutionPolicy Bypass -File setup-whisper-windows.ps1'
-        : isMac 
+        : isMac
           ? 'bash setup-whisper-mac.sh'
           : 'Please compile whisper.cpp manually';
-          
+
       throw new HttpException(
         `Whisper binary not found. Please run setup script: ${setupCommand}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
