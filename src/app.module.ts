@@ -11,6 +11,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { OpenaiModule } from './openai/openai.module';
 import { GrokModule } from './grok/grok.module';
+import { TtsfreeModule } from './ttsfree/ttsfree.module';
 import configuration from './common/config/configuration';
 
 @Module({
@@ -42,6 +43,7 @@ import configuration from './common/config/configuration';
     GeminiModule,
     OpenaiModule,
     GrokModule,
+    TtsfreeModule,
   ],
   controllers: [AppController],
   providers: [AppService, 
