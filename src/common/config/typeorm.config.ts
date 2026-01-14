@@ -1,17 +1,17 @@
 import {
   TypeOrmModuleAsyncOptions,
   TypeOrmModuleOptions,
-} from "@nestjs/typeorm";
-import configuration from "./configuration";
-import { DataSource } from "typeorm";
-import { Job } from "src/entities/job.entity";
+} from '@nestjs/typeorm';
+import configuration from './configuration';
+import { DataSource } from 'typeorm';
+import { Job } from 'src/entities/job.entity';
 
 export const TypeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
   imports: [],
   useFactory: (): TypeOrmModuleOptions => {
     const config = configuration();
     return {
-      type: "postgres",
+      type: 'postgres',
       host: config.database.host,
       port: config.database.port,
       username: config.database.username,
@@ -30,8 +30,8 @@ export const TypeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
       entities: [Job],
       synchronize: false,
       logging: false,
-      migrations: [__dirname + "/../../migrations/*{.ts,.js}"],
-      migrationsTableName: "typeorm_migrations",
+      migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
+      migrationsTableName: 'typeorm_migrations',
     };
   },
   inject: [],
@@ -40,7 +40,7 @@ export const TypeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
 const config = configuration();
 
 const dataSource = new DataSource({
-  type: "postgres",
+  type: 'postgres',
   host: config.database.host,
   port: config.database.port,
   username: config.database.username,
@@ -52,8 +52,8 @@ const dataSource = new DataSource({
     timeout: 20000,
   },
   entities: [Job],
-  migrations: [__dirname + "/../../migrations/*{.ts,.js}"],
-  migrationsTableName: "typeorm_migrations",
+  migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
+  migrationsTableName: 'typeorm_migrations',
 });
 
 export default dataSource;

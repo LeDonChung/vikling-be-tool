@@ -4,6 +4,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 
 @Injectable()
 export class JobsService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   create(createJobDto: CreateJobDto) {
     return 'This action adds a new job';
   }
@@ -16,6 +17,7 @@ export class JobsService {
     return `This action returns a #${id} job`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(id: number, updateJobDto: UpdateJobDto) {
     return `This action updates a #${id} job`;
   }

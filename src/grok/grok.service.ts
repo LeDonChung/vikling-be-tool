@@ -4,6 +4,7 @@ import { UpdateGrokDto } from './dto/update-grok.dto';
 
 @Injectable()
 export class GrokService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   create(createGrokDto: CreateGrokDto) {
     return 'This action adds a new grok';
   }
@@ -16,6 +17,7 @@ export class GrokService {
     return `This action returns a #${id} grok`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(id: number, updateGrokDto: UpdateGrokDto) {
     return `This action updates a #${id} grok`;
   }
