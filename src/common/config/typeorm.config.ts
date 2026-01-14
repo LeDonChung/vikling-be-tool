@@ -5,6 +5,10 @@ import {
 import configuration from './configuration';
 import { DataSource } from 'typeorm';
 import { Job } from 'src/entities/job.entity';
+import { config as dotenvConfig } from 'dotenv';
+
+// Load .env file for TypeORM CLI
+dotenvConfig();
 
 export const TypeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
   imports: [],
