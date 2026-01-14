@@ -38,7 +38,45 @@ Kiểm tra:
 docker compose ps
 ```
 
-### 3) Lệnh TypeORM (đã cấu hình sẵn -d ./src/common/config/typeorm.config.ts)
+### 3) Setup Whisper.cpp (cho STT - Speech-to-Text)
+
+#### Windows:
+```bash
+powershell -ExecutionPolicy Bypass -File setup-whisper-windows.ps1
+```
+
+#### macOS:
+```bash
+chmod +x setup-whisper-mac.sh
+./setup-whisper-mac.sh
+```
+
+#### Linux:
+```bash
+# Install dependencies
+sudo apt-get update
+sudo apt-get install -y build-essential git
+
+# Clone and build
+git clone https://github.com/ggerganov/whisper.cpp.git
+cd whisper.cpp
+make
+cd ..
+
+# Setup directories
+mkdir -p whisper-bin whisper-models
+cp whisper.cpp/main whisper-bin/
+
+# Download model (~466MB)
+curl -L -o whisper-models/ggml-small.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
+```
+
+Script sẽ tự động:
+- Download model `ggml-small.bin` (~466MB) từ Hugging Face
+- Download/build whisper binary
+- Setup vào thư mục `whisper-bin/` và `whisper-models/`
+
+### 4) Lệnh TypeORM (đã cấu hình sẵn -d ./src/common/config/typeorm.config.ts)
 - Tạo migration (tên ví dụ `CreateJobTable`):
 ```
 pnpm run migration:create -- src/migrations/CreateJobTable
@@ -59,9 +97,46 @@ pnpm run migration:revert
 ```
 pnpm run migration:show
 ```
-
-### 4) Chạy dự án
+### 5) Chạy dự án
 - Development mode:
 ```
 pnpm start:dev
+```
+
+### 6) API Endpoints
+
+#### TTS (Text-to-Speech)
+```bash
+POST http://localhost:7000/ttsfree
+Content-Type: application/json
+
+{
+  "text": "Xin chào Việt Nam",
+  "language": "vi-VN",
+  "voice": "Hoài My",
+  "speed": 1,
+  "pitch": 1
+}
+```
+
+#### STT (Speech-to-Text)
+```bash
+POST http://localhost:7000/stt/transcribe
+Content-Type: multipart/form-data
+
+file: [audio file]
+model: small
+language: vi
+```
+
+#### Translation
+```bash
+POST http://localhost:7000/translation/translate
+Content-Type: application/json
+
+{
+  "text": "Hello world",
+  "sourceLanguage": "en",
+  "targetLanguage": "vi"
+}
 ```
