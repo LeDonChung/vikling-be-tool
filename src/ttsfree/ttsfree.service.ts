@@ -18,6 +18,7 @@ export class TtsfreeService {
   }
 
   async create(createTtsfreeDto: CreateTtsfreeDto) {
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     let browser: puppeteer.Browser | undefined;
 
     try {
@@ -130,7 +131,7 @@ export class TtsfreeService {
           reject(new Error('Audio download timeout after 2 minutes'));
         }, 120000); // 2 minutes timeout
 
-         page.on('response', async (response) => {
+        page.on('response', (response) => {
           const url = response.url();
           if (
             url.includes('.mp3') ||
