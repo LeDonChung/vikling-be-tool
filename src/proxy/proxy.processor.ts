@@ -5,7 +5,7 @@ import { ProxyService } from './proxy.service';
 import { ProxyCheckJob } from './dto/proxy.dto';
 
 @Processor('proxy-check', {
-  concurrency: 5, // Xử lý 5 proxy cùng lúc
+  concurrency: 5,
 })
 export class ProxyProcessor extends WorkerHost {
   private readonly logger = new Logger(ProxyProcessor.name);
@@ -14,24 +14,22 @@ export class ProxyProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<ProxyCheckJob>): Promise<{ isLive: boolean }> {
-    const { proxy } = job.data;
+  async process(job: Job<ProxyCheckJob | { recheck: boolean }>): Promise<{ isLive: boolean } | { recheckQueued: boolean }> {
+    if (job.name === 'recheck-all-proxies') {
+      await this.proxyService.queueProxyCheck();
+      return { recheckQueued: true };
+    }
 
-    this.logger.debug(
-      `Processing proxy check for ${proxy.public_ip}:${proxy.http_port}`,
-    );
+    const { proxy } = job.data as ProxyCheckJob;
 
     try {
       const isLive = await this.proxyService.checkProxyLive(proxy);
 
       if (isLive) {
         await this.proxyService.saveLiveProxy(proxy);
-        this.logger.log(
-          `✅ Proxy ${proxy.id} (${proxy.public_ip}:${proxy.http_port}) is LIVE`,
-        );
       } else {
         this.logger.log(
-          `❌ Proxy ${proxy.id} (${proxy.public_ip}:${proxy.http_port}) is DEAD`,
+          `Proxy ${proxy.id} (${proxy.public_ip}:${proxy.http_port}) is DEAD`,
         );
       }
 
@@ -46,18 +44,16 @@ export class ProxyProcessor extends WorkerHost {
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job<ProxyCheckJob>) {
-    this.logger.debug(`Job ${job.id} completed for proxy ${job.data.proxy.id}`);
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job<ProxyCheckJob>, error: Error) {
     this.logger.error(
-      `Job ${job.id} failed for proxy ${job.data.proxy.id}: ${error.message}`,
+      `Job ${job.id} failed for proxy ${job.data.proxy}: ${error.message}`,
     );
   }
 
   @OnWorkerEvent('active')
   onActive(job: Job<ProxyCheckJob>) {
-    this.logger.debug(`Job ${job.id} started for proxy ${job.data.proxy.id}`);
   }
 }

@@ -14,6 +14,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - vikling_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -27,6 +32,44 @@ services:
       - redis_data:/data
     networks:
       - vikling_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vikling_backend
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-7005}
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT:-5000}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-5001}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "${PORT:-7005}:7005"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./whisper-bin:/app/whisper-bin
+      - ./whisper-models:/app/whisper-models
+    networks:
+      - vikling_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:

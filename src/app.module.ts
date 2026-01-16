@@ -15,6 +15,7 @@ import { TtsfreeModule } from './ttsfree/ttsfree.module';
 import { SttModule } from './stt/stt.module';
 import { TranslationModule } from './translation/translation.module';
 import { ProxyModule } from './proxy/proxy.module';
+import { ElabModule } from './elelab/elelab.module';
 import configuration from './common/config/configuration';
 
 @Module({
@@ -50,6 +51,7 @@ import configuration from './common/config/configuration';
     SttModule,
     TranslationModule,
     ProxyModule,
+    ElabModule,
   ],
   controllers: [AppController],
   providers: [
