@@ -11,7 +11,7 @@ import {
 } from './dto/proxy.dto';
 
 const REDIS_PROXY_KEY = 'proxies';
-const REDIS_PROXY_EXPIRE = 5 * 60;
+const REDIS_PROXY_EXPIRE = 60 * 60;
 
 @Injectable()
 export class ProxyService implements OnModuleInit {
@@ -180,11 +180,11 @@ export class ProxyService implements OnModuleInit {
   }
 
   /**
-   * Lấy tất cả proxy live từ Redis (random 10)
+   * Lấy tất cả proxy live từ Redis (random 20)
    * Returns: ["username:pass@host:port", ...]
    * Tự động loại bỏ proxy đã hết hạn
    */
-  async getLiveProxies(count: number = 10): Promise<string[]> {
+  async getLiveProxies(count: number = 20): Promise<string[]> {
     const proxies = await this.redis.hgetall(REDIS_PROXY_KEY);
     const expiredKeys: string[] = [];
 

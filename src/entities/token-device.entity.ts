@@ -33,6 +33,13 @@ export class TokenDevice {
   tokenId: string;
 
   /**
+   * Lưu device fingerprint plain-text để admin dễ quản lý và tra cứu.
+   * Chỉ admin có quyền đọc field này.
+   */
+  @Column({ type: 'varchar', nullable: true })
+  deviceFpPlain: string | null;
+
+  /**
    * "Dấu vân tay" thiết bị (device fingerprint) nhưng đã hash.
    * Index để lookup nhanh khi thiết bị gọi lên: "thiết bị này đã activate chưa?"
    * Không lưu raw fingerprint để giảm rủi ro lộ thông tin máy.

@@ -176,6 +176,7 @@ export class LicenseService implements OnModuleInit {
         device = deviceRepo.create({
           tokenId: token.id,
           deviceFpHash,
+          deviceFpPlain: dto.deviceFingerprint,
           deviceName: dto.deviceName,
           platform: dto.platform,
           appVersion: dto.appVersion,
@@ -280,6 +281,7 @@ export class LicenseService implements OnModuleInit {
     const token = this.tokenRepository.create({
       type: dto.type,
       tokenHash,
+      tokenPlain: tokenString,
       maxDevices: dto.maxDevices,
       expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
       startsAt: dto.startsAt ? new Date(dto.startsAt) : null,

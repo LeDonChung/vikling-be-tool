@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, UseGuards } from '@nestjs/common';
 import { ProxyService } from './proxy.service';
+import { LicenseGuard } from 'src/license/guards/license.guard';
 
 @Controller('proxy')
 export class ProxyController {
@@ -25,6 +26,7 @@ export class ProxyController {
   }
 
   @Get('live')
+  @UseGuards(LicenseGuard)
   async getLiveProxies() {
     const proxies = await this.proxyService.getLiveProxies();
     return {

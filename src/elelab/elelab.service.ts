@@ -41,7 +41,7 @@ export class ElabService implements OnModuleDestroy {
     return keys.length;
   }
 
-  async listAllElabKeys(count: number = 10): Promise<string[]> {
+  async listAllElabKeys(count: number = 100): Promise<string[]> {
     const allKeys = await this.redis.lrange(DEFAULT_KEY_NAME, 0, -1);
     
     if (allKeys.length <= count) {
