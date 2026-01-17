@@ -16,6 +16,8 @@ import { SttModule } from './stt/stt.module';
 import { TranslationModule } from './translation/translation.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { ElabModule } from './elelab/elelab.module';
+import { ApiKeysModule } from './apikeys/apikeys.module';
+import { LicenseModule } from './license/license.module';
 import configuration from './common/config/configuration';
 
 @Module({
@@ -52,6 +54,8 @@ import configuration from './common/config/configuration';
     TranslationModule,
     ProxyModule,
     ElabModule,
+    ApiKeysModule,
+    LicenseModule,
   ],
   controllers: [AppController],
   providers: [
