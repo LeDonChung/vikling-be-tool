@@ -16,6 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
     BullModule.registerQueue({ name: 'video-jobs' }),
+    BullModule.registerQueue({ name: 'license-jobs' }),
   ],
   exports: [BullModule],
 })

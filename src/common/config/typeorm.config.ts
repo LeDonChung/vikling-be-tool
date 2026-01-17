@@ -4,8 +4,9 @@ import {
 } from '@nestjs/typeorm';
 import configuration from './configuration';
 import { DataSource } from 'typeorm';
-import { Job } from 'src/entities/job.entity';
 import { config as dotenvConfig } from 'dotenv';
+import { Token } from 'src/entities/token.entity';
+import { TokenDevice } from 'src/entities/token-device.entity';
 
 // Load .env file for TypeORM CLI
 dotenvConfig();
@@ -31,7 +32,7 @@ export const TypeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
         maxReconnects: 3,
         reconnectDelay: 2000,
       },
-      entities: [Job],
+      entities: [Token, TokenDevice],
       synchronize: false,
       logging: false,
       migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
@@ -55,7 +56,7 @@ const dataSource = new DataSource({
     acquireTimeout: 20000,
     timeout: 20000,
   },
-  entities: [Job],
+  entities: [Token, TokenDevice],
   migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
   migrationsTableName: 'typeorm_migrations',
 });
