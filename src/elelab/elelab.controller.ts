@@ -5,12 +5,14 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ElabService } from './elelab.service';
 import {
   ImportKeysResponseDto,
 } from './dto/elelab.dto';
+import { LicenseGuard } from 'src/license/guards/license.guard';
 
 @Controller('elelab')
 export class ElabController {
@@ -38,6 +40,7 @@ export class ElabController {
   }
 
   @Get('list-keys')
+  @UseGuards(LicenseGuard)
   async listAllKeys() {
     const keys = await this.elabService.listAllElabKeys();
     return {

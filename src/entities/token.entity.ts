@@ -37,7 +37,14 @@ export class Token {
   type: LicenseType;
 
   /**
-   * Không lưu token plain-text để tránh rò rỉ DB là lộ toàn bộ key.
+   * Lưu token plain-text để admin dễ quản lý và tra cứu.
+   * Chỉ admin có quyền đọc field này.
+   */
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  tokenPlain: string | null;
+
+  /**
+   * Hash của token để verify khi user nhập key.
    * Khi user nhập key: server hash key đó và so với token_hash.
    * unique đảm bảo không có 2 token trùng nhau.
    * Thực tế: nên dùng hash có "pepper" (secret server) để chống rainbow-table.
